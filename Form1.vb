@@ -1,6 +1,9 @@
 ﻿Imports System.ComponentModel
 
 Public Class Form1
+    Private apiKeyPath As String = Application.StartupPath() + "key.txt"
+    Private apiKey As String
+
     Private Const newLineCharacter As Char = vbLf
     Private Const RequestSize As UInt64 = 5000
     Private Const RequestRate As UInt64 = 950
@@ -14,6 +17,19 @@ Public Class Form1
     Private lastRequestTime As Date = Date.MinValue
     Private processes As UInt64 = 0
     Private Async Sub Form1_Load(sender As Object, e As EventArgs) Handles MyBase.Load
+        If IO.File.Exists(apiKeyPath) Then
+            Try
+                apiKey = IO.File.ReadAllText(apiKeyPath)
+            Catch
+            End Try
+        End If
+        If String.IsNullOrWhiteSpace(apiKey) Then
+            apiKey = InputBox("Please enter Google Cloud API Key for Google Cloud's Text-to-Speech API.", "API Key Undefined")
+            Try
+                IO.File.WriteAllText(apiKeyPath, apiKey)
+            Catch
+            End Try
+        End If
         ComboBox1.Width = Panel4.ClientSize.Width - 1
         ComboBox1.Top = (Panel4.ClientSize.Height / 2) - (ComboBox1.Height / 2)
         ComboBox1.Anchor = AnchorStyles.Left Or AnchorStyles.Right
@@ -83,13 +99,13 @@ Public Class Form1
     Private Async Function GetAudio(Text As String, Voice As String, Pitch As Integer, Speed As Double) As Task(Of Byte())
         Dim request As String = "{""audioConfig"":{""audioEncoding"":""MP3"",""pitch"":" & Pitch & ",""speakingRate"":" & Speed & "},""input"":{""text"":" & Newtonsoft.Json.JsonConvert.SerializeObject(Text) & "},""voice"":{""languageCode"":""en-US"",""name"":""" & Voice & """}}"
         Dim httpContent As New Net.Http.StringContent(request)
-        Dim rawResponse As Net.Http.HttpResponseMessage = Await httpClient.PostAsync("https://texttospeech.googleapis.com/v1beta1/text:synthesize?key=AIzaSyAOsImUr0W7AjLx9dn4fbI3IL7q6M0dbFE", httpContent)
+        Dim rawResponse As Net.Http.HttpResponseMessage = Await httpClient.PostAsync("https://texttospeech.googleapis.com/v1beta1/text:synthesize?key=" + apiKey, httpContent)
         Dim response As String = Await rawResponse.Content.ReadAsStringAsync()
         Dim result As String = Newtonsoft.Json.JsonConvert.DeserializeObject(Of ResponseType0)(response).audioContent
         Return Convert.FromBase64String(result)
     End Function
     Private Async Function GetRawVoices() As Task(Of RawVoiceInformation())
-        Dim rawResponse As Net.Http.HttpResponseMessage = Await httpClient.GetAsync("https://texttospeech.googleapis.com/v1/voices?key=AIzaSyAOsImUr0W7AjLx9dn4fbI3IL7q6M0dbFE")
+        Dim rawResponse As Net.Http.HttpResponseMessage = Await httpClient.GetAsync("https://texttospeech.googleapis.com/v1/voices?key=" + apiKey)
         Dim response As String = Await rawResponse.Content.ReadAsStringAsync()
         Return Newtonsoft.Json.JsonConvert.DeserializeObject(Of ResponseType1)(response).voices
     End Function
