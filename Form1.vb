@@ -15,21 +15,21 @@ Public Class Form1
     Private processes As UInt64 = 0
     Private Async Sub Form1_Load(sender As Object, e As EventArgs) Handles MyBase.Load
         ComboBox1.Width = Panel4.ClientSize.Width - 1
-        ComboBox1.Top = Panel4.ClientSize.Height / 2 - ComboBox1.Height / 2
+        ComboBox1.Top = (Panel4.ClientSize.Height / 2) - (ComboBox1.Height / 2)
         ComboBox1.Anchor = AnchorStyles.Left Or AnchorStyles.Right
         ComboBox2.Width = Panel5.ClientSize.Width - 1
-        ComboBox2.Top = Panel5.ClientSize.Height / 2 - ComboBox2.Height / 2
+        ComboBox2.Top = (Panel5.ClientSize.Height / 2) - (ComboBox2.Height / 2)
         ComboBox2.Anchor = AnchorStyles.Left Or AnchorStyles.Right
         TextBox1.Left = 3
         TextBox1.Width = Panel1.ClientSize.Width - 6
-        TextBox1.Top = Panel1.ClientSize.Height / 2 - TextBox1.Height / 2
+        TextBox1.Top = (Panel1.ClientSize.Height / 2) - (TextBox1.Height / 2)
         TextBox1.Anchor = AnchorStyles.Left Or AnchorStyles.Right
         TextBox2.Left = 3
         TextBox2.Width = Panel2.ClientSize.Width - 6
-        TextBox2.Top = Panel2.ClientSize.Height / 2 - TextBox2.Height / 2
+        TextBox2.Top = (Panel2.ClientSize.Height / 2) - (TextBox2.Height / 2)
         TextBox2.Anchor = AnchorStyles.Left Or AnchorStyles.Right
         ComboBox3.Width = Panel6.ClientSize.Width - 1
-        ComboBox3.Top = Panel6.ClientSize.Height / 2 - ComboBox3.Height / 2
+        ComboBox3.Top = (Panel6.ClientSize.Height / 2) - (ComboBox3.Height / 2)
         ComboBox3.Anchor = AnchorStyles.Left Or AnchorStyles.Right
         WindowState = FormWindowState.Maximized
         ComboBox3.SelectedIndex = 1
@@ -108,7 +108,7 @@ Public Class Form1
         Return voices
     End Function
     Private Function GetLength(Text As String, Voice As String, Pitch As Integer, Speed As Double) As Boolean
-        Return RequestSize >= System.Text.Encoding.UTF8.GetBytes(("{""audioConfig"":{""audioEncoding"":""MP3"",""pitch"":" & Pitch & ",""speakingRate"":" & Speed & "},""input"":{""text"":" & Newtonsoft.Json.JsonConvert.SerializeObject(Text) & "},""voice"":{""languageCode"":""en-US"",""name"":""" & Voice & """}}")).Length
+        Return RequestSize >= System.Text.Encoding.UTF8.GetBytes("{""audioConfig"":{""audioEncoding"":""MP3"",""pitch"":" & Pitch & ",""speakingRate"":" & Speed & "},""input"":{""text"":" & Newtonsoft.Json.JsonConvert.SerializeObject(Text) & "},""voice"":{""languageCode"":""en-US"",""name"":""" & Voice & """}}").Length
     End Function
     Private Sub ComboBox1_SelectedIndexChanged(sender As Object, e As EventArgs) Handles ComboBox1.SelectedIndexChanged
         Reset0()
@@ -218,7 +218,7 @@ Public Class Form1
             ElseIf Double.Parse(text1) > 10 Then
                 text1 = "10"
             Else
-                While text1.StartsWith("0") And If(text1.Contains("."c), text1.IndexOf("."c) > 1, True)
+                While text1.StartsWith("0") And (Not text1.Contains("."c) OrElse text1.IndexOf("."c) > 1)
                     text1 = text1.Substring(1)
                 End While
                 If text1 = "" Then text1 = "0"
@@ -226,11 +226,7 @@ Public Class Form1
             suspended2 = True
             TextBox2.Text = text1
             suspended2 = False
-            If text1 = "0" Then
-                TextBox2.SelectionStart = 1
-            Else
-                TextBox2.SelectionStart = currentPosition
-            End If
+            TextBox2.SelectionStart = If(text1 = "0", 1, currentPosition)
         End If
     End Sub
     Private Sub TextBox2_LostFocus(sender As Object, e As EventArgs) Handles TextBox2.LostFocus
@@ -653,7 +649,7 @@ Public Class Form1
         newThread.Start()
     End Sub
     Private Sub Form1_Closing(sender As Object, e As CancelEventArgs) Handles Me.Closing
-        If processes > 0 Then e.Cancel = (MessageBox.Show("There " & If(processes = 1, "is", "are") & " still " & processes & If(processes = 1, " process", " processes") & " running. Cancel anyway?", "Termination confirmation", MessageBoxButtons.YesNo, MessageBoxIcon.Warning, MessageBoxDefaultButton.Button2) = DialogResult.No)
+        If processes > 0 Then e.Cancel = MessageBox.Show("There " & If(processes = 1, "is", "are") & " still " & processes & If(processes = 1, " process", " processes") & " running. Cancel anyway?", "Termination confirmation", MessageBoxButtons.YesNo, MessageBoxIcon.Warning, MessageBoxDefaultButton.Button2) = DialogResult.No
     End Sub
 End Class
 Public Class ResponseType0
